@@ -17,7 +17,7 @@
 
 package com.chnnhc.shortlink.admin.common.enums;
 
-import com.nageoffer.shortlink.admin.common.convention.errorcode.IErrorCode;
+import com.chnnhc.shortlink.admin.common.convention.errorcode.IErrorCode;
 
 /**
  * 用户错误码

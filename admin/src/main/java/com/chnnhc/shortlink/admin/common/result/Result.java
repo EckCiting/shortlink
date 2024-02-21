@@ -1,4 +1,4 @@
-package com.chnnhc.shortlink.common.result;
+package com.chnnhc.shortlink.admin.common.result;
 
 import lombok.Data;
 import lombok.experimental.Accessors;

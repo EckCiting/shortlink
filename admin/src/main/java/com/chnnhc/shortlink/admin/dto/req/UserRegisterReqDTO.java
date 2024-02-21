@@ -14,12 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.chnnhc.shortlink.admin.dto.req;
 
 import lombok.Data;
 
 /** 用户注册请求参数 */
-public class UserRegusterReqDTO {
+@Data
+public class UserRegisterReqDTO {
   /** 用户名 */
   private String username;
 
