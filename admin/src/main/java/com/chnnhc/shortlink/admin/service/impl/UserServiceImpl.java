@@ -1,11 +1,18 @@
 package com.chnnhc.shortlink.admin.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.lang.UUID;
+import com.alibaba.fastjson2.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.chnnhc.shortlink.admin.common.convention.exception.ClientException;
 import com.chnnhc.shortlink.admin.dao.entity.UserDO;
 import com.chnnhc.shortlink.admin.dao.mapper.UserMapper;
+import com.chnnhc.shortlink.admin.dto.req.UserLoginReqDTO;
 import com.chnnhc.shortlink.admin.dto.req.UserRegisterReqDTO;
+import com.chnnhc.shortlink.admin.dto.resp.UserLoginRespDTO;
 import com.chnnhc.shortlink.admin.service.GroupService;
 import com.chnnhc.shortlink.admin.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +22,9 @@ import org.redisson.api.RedissonClient;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static com.chnnhc.shortlink.admin.common.constant.RedisCacheConstant.LOCK_USER_REGISTER_KEY;
 import static com.chnnhc.shortlink.admin.common.enums.UserErrorCodeEnum.*;
@@ -33,6 +43,44 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
   public Boolean hasUsername(String username) {
     // 布隆过滤器
     return !userRegisterCachePenetrationBloomFilter.contains(username);
+  }
+
+  @Override
+  public UserLoginRespDTO login(UserLoginReqDTO requestParam) {
+    // 使用LambdaQueryWrapper构建查询条件，查询用户信息
+    LambdaQueryWrapper<UserDO> queryWrapper = Wrappers.lambdaQuery(UserDO.class)
+            .eq(UserDO::getUsername, requestParam.getUsername())
+            .eq(UserDO::getPassword, requestParam.getPassword())
+            .eq(UserDO::getDelFlag, 0); // 确保用户未被删除，即DelFlag字段为0
+    // 执行查询，返回单个用户对象
+    UserDO userDO = baseMapper.selectOne(queryWrapper);
+    if (userDO == null) {
+      throw new ClientException("用户不存在");
+    }
+    // 查询Redis中是否已经有该用户的登录记录
+    Map<Object ,Object> hasLoginMap = stringRedisTemplate.opsForHash().entries("login_" + requestParam.getUsername());
+    if (CollUtil.isNotEmpty(hasLoginMap)) {
+      // 如果登录记录存在，从Redis中获取已有的token
+      String token = hasLoginMap.keySet().stream()
+              .findFirst()
+              .map(Object::toString)
+              .orElseThrow(() -> new ClientException("用户登录错误"));
+      return new UserLoginRespDTO(token);
+    }
+    /**
+     * Hash
+     * Key：login_用户名
+     * Value：
+     *  Key：token标识
+     *  Val：JSON 字符串（用户信息）
+     */
+    // 生成一个新的UUID作为token
+    String uuid = UUID.randomUUID().toString();
+    // 将新的登录信息（token及用户信息）存入Redis
+    stringRedisTemplate.opsForHash().put("login_" + requestParam.getUsername(), uuid, JSON.toJSONString(userDO));
+    // 设置该登录记录的过期时间为30分钟
+    stringRedisTemplate.expire("login_" + requestParam.getUsername(), 30L, TimeUnit.MINUTES);
+    return new UserLoginRespDTO(uuid);
   }
 
   @Override
@@ -66,5 +114,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     } finally {
       lock.unlock();
     }
+  }
+  @Override
+  public Boolean checkLogin(String username, String token) {
+    return stringRedisTemplate.opsForHash().get("login_" + username, token) != null;
+  }
+
+  @Override
+  public void logout(String username, String token) {
+    if (checkLogin(username, token)) {
+      stringRedisTemplate.delete("login_" + username);
+      return;
+    }
+    throw new ClientException("用户Token不存在或用户未登录");
   }
 }
