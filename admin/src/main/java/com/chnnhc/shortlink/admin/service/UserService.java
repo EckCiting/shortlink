@@ -2,7 +2,9 @@ package com.chnnhc.shortlink.admin.service;
 
 import com.chnnhc.shortlink.admin.dto.req.UserLoginReqDTO;
 import com.chnnhc.shortlink.admin.dto.req.UserRegisterReqDTO;
+import com.chnnhc.shortlink.admin.dto.resp.UserActualRespDTO;
 import com.chnnhc.shortlink.admin.dto.resp.UserLoginRespDTO;
+import com.chnnhc.shortlink.admin.dto.resp.UserRespDTO;
 
 public interface UserService {
   /**
@@ -44,4 +46,12 @@ public interface UserService {
    * @param token 用户登录 Token
    */
   void logout(String username, String token);
+
+  /**
+   * 根据用户名查询用户信息
+   *
+   * @param username 用户名
+   * @return 用户返回实体
+   */
+  UserRespDTO getUserByUsername(String username);
 }

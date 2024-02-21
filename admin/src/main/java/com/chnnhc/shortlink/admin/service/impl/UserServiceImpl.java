@@ -8,17 +8,22 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.chnnhc.shortlink.admin.common.convention.exception.ClientException;
+import com.chnnhc.shortlink.admin.common.convention.exception.ServiceException;
+import com.chnnhc.shortlink.admin.common.enums.UserErrorCodeEnum;
 import com.chnnhc.shortlink.admin.dao.entity.UserDO;
 import com.chnnhc.shortlink.admin.dao.mapper.UserMapper;
 import com.chnnhc.shortlink.admin.dto.req.UserLoginReqDTO;
 import com.chnnhc.shortlink.admin.dto.req.UserRegisterReqDTO;
+import com.chnnhc.shortlink.admin.dto.resp.UserActualRespDTO;
 import com.chnnhc.shortlink.admin.dto.resp.UserLoginRespDTO;
+import com.chnnhc.shortlink.admin.dto.resp.UserRespDTO;
 import com.chnnhc.shortlink.admin.service.GroupService;
 import com.chnnhc.shortlink.admin.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RBloomFilter;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -127,5 +132,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
       return;
     }
     throw new ClientException("用户Token不存在或用户未登录");
+  }
+
+  @Override
+  public UserRespDTO getUserByUsername(String username) {
+    LambdaQueryWrapper<UserDO> queryWrapper = Wrappers.lambdaQuery(UserDO.class)
+            .eq(UserDO::getUsername,username);
+    UserDO userDO = baseMapper.selectOne(queryWrapper);
+    if(userDO == null){
+      throw new ServiceException(USER_NULL);
+    }
+    UserRespDTO result = new UserRespDTO();
+    // 不用构造器是因为参数太多
+    BeanUtils.copyProperties(userDO,result);
+    return result;
   }
 }
