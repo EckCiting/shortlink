@@ -2,6 +2,7 @@ package com.chnnhc.shortlink.admin.service;
 
 import com.chnnhc.shortlink.admin.dto.req.UserLoginReqDTO;
 import com.chnnhc.shortlink.admin.dto.req.UserRegisterReqDTO;
+import com.chnnhc.shortlink.admin.dto.req.UserUpdateReqDTO;
 import com.chnnhc.shortlink.admin.dto.resp.UserActualRespDTO;
 import com.chnnhc.shortlink.admin.dto.resp.UserLoginRespDTO;
 import com.chnnhc.shortlink.admin.dto.resp.UserRespDTO;
@@ -54,4 +55,12 @@ public interface UserService {
    * @return 用户返回实体
    */
   UserRespDTO getUserByUsername(String username);
+
+  /**
+   * 根据用户名修改用户
+   *
+   * @param requestParam 修改用户请求参数
+   */
+  void update(UserUpdateReqDTO requestParam);
+
 }

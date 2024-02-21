@@ -5,6 +5,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.UUID;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.chnnhc.shortlink.admin.common.convention.exception.ClientException;
@@ -14,6 +15,7 @@ import com.chnnhc.shortlink.admin.dao.entity.UserDO;
 import com.chnnhc.shortlink.admin.dao.mapper.UserMapper;
 import com.chnnhc.shortlink.admin.dto.req.UserLoginReqDTO;
 import com.chnnhc.shortlink.admin.dto.req.UserRegisterReqDTO;
+import com.chnnhc.shortlink.admin.dto.req.UserUpdateReqDTO;
 import com.chnnhc.shortlink.admin.dto.resp.UserActualRespDTO;
 import com.chnnhc.shortlink.admin.dto.resp.UserLoginRespDTO;
 import com.chnnhc.shortlink.admin.dto.resp.UserRespDTO;
@@ -146,5 +148,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     // 不用构造器是因为参数太多
     BeanUtils.copyProperties(userDO,result);
     return result;
+  }
+
+  @Override
+  public void update(UserUpdateReqDTO requestParam) {
+    // TODO 验证当前用户名是否为登录用户
+    LambdaUpdateWrapper<UserDO> updateWrapper = Wrappers.lambdaUpdate(UserDO.class)
+            .eq(UserDO::getUsername, requestParam.getUsername());
+    // 将 UserUpdateReqDTO 对象转换成 UserDO对象。再将这个对象放入和 updateWrapper 匹配的记录中
+    baseMapper.update(BeanUtil.toBean(requestParam, UserDO.class), updateWrapper);
   }
 }
