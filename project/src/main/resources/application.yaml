@@ -1,0 +1,19 @@
+server:
+  port: 8000
+
+spring:
+  datasource:
+    driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
+    url: jdbc:shardingsphere:classpath:shardingsphere-config-${database.env:dev}.yaml
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      password: 123456
+
+short-link:
+  domain:
+    default: chnnhc.com:8000
+  stats:
+    locale:
+      amap-key: 824c511f0997586ea016f979fdb23087

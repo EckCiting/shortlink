@@ -1,8 +1,7 @@
-package com.chnnhc.shortlink.admin.common.result;
+package com.chnnhc.shortlink.project.common.result;
 
-import com.chnnhc.shortlink.admin.common.convention.errorcode.BaseErrorCode;
-import com.chnnhc.shortlink.admin.common.convention.exception.AbstractException;
-
+import com.chnnhc.shortlink.project.common.convention.errorcode.BaseErrorCode;
+import com.chnnhc.shortlink.project.common.convention.exception.AbstractException;
 import java.util.Optional;
 
 /** 全局返回对象构造器 */

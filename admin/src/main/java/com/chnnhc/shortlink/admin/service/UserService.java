@@ -62,5 +62,4 @@ public interface UserService {
    * @param requestParam 修改用户请求参数
    */
   void update(UserUpdateReqDTO requestParam);
-
 }

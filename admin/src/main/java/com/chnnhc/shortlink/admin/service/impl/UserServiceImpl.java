@@ -45,7 +45,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
   private final StringRedisTemplate stringRedisTemplate;
   private final GroupService groupService;
 
-
   @Override
   public Boolean hasUsername(String username) {
     // 布隆过滤器
@@ -55,7 +54,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
   @Override
   public UserLoginRespDTO login(UserLoginReqDTO requestParam) {
     // 使用LambdaQueryWrapper构建查询条件，查询用户信息
-    LambdaQueryWrapper<UserDO> queryWrapper = Wrappers.lambdaQuery(UserDO.class)
+    LambdaQueryWrapper<UserDO> queryWrapper =
+        Wrappers.lambdaQuery(UserDO.class)
             .eq(UserDO::getUsername, requestParam.getUsername())
             .eq(UserDO::getPassword, requestParam.getPassword())
             .eq(UserDO::getDelFlag, 0); // 确保用户未被删除，即DelFlag字段为0
@@ -65,26 +65,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
       throw new ClientException("用户不存在");
     }
     // 查询Redis中是否已经有该用户的登录记录
-    Map<Object ,Object> hasLoginMap = stringRedisTemplate.opsForHash().entries("login_" + requestParam.getUsername());
+    Map<Object, Object> hasLoginMap =
+        stringRedisTemplate.opsForHash().entries("login_" + requestParam.getUsername());
     if (CollUtil.isNotEmpty(hasLoginMap)) {
       // 如果登录记录存在，从Redis中获取已有的token
-      String token = hasLoginMap.keySet().stream()
+      String token =
+          hasLoginMap.keySet().stream()
               .findFirst()
               .map(Object::toString)
               .orElseThrow(() -> new ClientException("用户登录错误"));
       return new UserLoginRespDTO(token);
     }
-    /**
-     * Hash
-     * Key：login_用户名
-     * Value：
-     *  Key：token标识
-     *  Val：JSON 字符串（用户信息）
-     */
+    /** Hash Key：login_用户名 Value： Key：token标识 Val：JSON 字符串（用户信息） */
     // 生成一个新的UUID作为token
     String uuid = UUID.randomUUID().toString();
     // 将新的登录信息（token及用户信息）存入Redis
-    stringRedisTemplate.opsForHash().put("login_" + requestParam.getUsername(), uuid, JSON.toJSONString(userDO));
+    stringRedisTemplate
+        .opsForHash()
+        .put("login_" + requestParam.getUsername(), uuid, JSON.toJSONString(userDO));
     // 设置该登录记录的过期时间为30分钟
     stringRedisTemplate.expire("login_" + requestParam.getUsername(), 30L, TimeUnit.MINUTES);
     return new UserLoginRespDTO(uuid);
@@ -122,6 +120,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
       lock.unlock();
     }
   }
+
   @Override
   public Boolean checkLogin(String username, String token) {
     return stringRedisTemplate.opsForHash().get("login_" + username, token) != null;
@@ -138,23 +137,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
   @Override
   public UserRespDTO getUserByUsername(String username) {
-    LambdaQueryWrapper<UserDO> queryWrapper = Wrappers.lambdaQuery(UserDO.class)
-            .eq(UserDO::getUsername,username);
+    LambdaQueryWrapper<UserDO> queryWrapper =
+        Wrappers.lambdaQuery(UserDO.class).eq(UserDO::getUsername, username);
     UserDO userDO = baseMapper.selectOne(queryWrapper);
-    if(userDO == null){
+    if (userDO == null) {
       throw new ServiceException(USER_NULL);
     }
     UserRespDTO result = new UserRespDTO();
     // 不用构造器是因为参数太多
-    BeanUtils.copyProperties(userDO,result);
+    BeanUtils.copyProperties(userDO, result);
     return result;
   }
 
   @Override
   public void update(UserUpdateReqDTO requestParam) {
     // TODO 验证当前用户名是否为登录用户
-    LambdaUpdateWrapper<UserDO> updateWrapper = Wrappers.lambdaUpdate(UserDO.class)
-            .eq(UserDO::getUsername, requestParam.getUsername());
+    LambdaUpdateWrapper<UserDO> updateWrapper =
+        Wrappers.lambdaUpdate(UserDO.class).eq(UserDO::getUsername, requestParam.getUsername());
     // 将 UserUpdateReqDTO 对象转换成 UserDO对象。再将这个对象放入和 updateWrapper 匹配的记录中
     baseMapper.update(BeanUtil.toBean(requestParam, UserDO.class), updateWrapper);
   }
