@@ -1,9 +1,12 @@
 package com.chnnhc.shortlink.project.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.text.StrBuilder;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.chnnhc.shortlink.project.common.convention.exception.ServiceException;
@@ -12,7 +15,10 @@ import com.chnnhc.shortlink.project.dao.entity.ShortLinkGotoDO;
 import com.chnnhc.shortlink.project.dao.mapper.ShortLinkGotoMapper;
 import com.chnnhc.shortlink.project.dao.mapper.ShortLinkMapper;
 import com.chnnhc.shortlink.project.dto.req.ShortLinkCreateReqDTO;
+import com.chnnhc.shortlink.project.dto.req.ShortLinkPageReqDTO;
 import com.chnnhc.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
+import com.chnnhc.shortlink.project.dto.resp.ShortLinkGroupCountQueryRespDTO;
+import com.chnnhc.shortlink.project.dto.resp.ShortLinkPageRespDTO;
 import com.chnnhc.shortlink.project.service.ShortLinkService;
 
 import com.chnnhc.shortlink.project.toolkit.HashUtil;
@@ -23,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.redisson.api.RBloomFilter;
 import org.springframework.dao.DuplicateKeyException;
@@ -32,6 +39,7 @@ import org.springframework.stereotype.Service;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -120,6 +128,31 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         .originUrl(requestParam.getOriginUrl())
         .gid(requestParam.getGid())
         .build();
+  }
+
+  @Override
+  public List<ShortLinkGroupCountQueryRespDTO> listGroupShortLinkCount(List<String> requestParam) {
+    QueryWrapper<ShortLinkDO> queryWrapper =
+        Wrappers.query(new ShortLinkDO())
+            .select("gid as gid, count(*) as shortLinkCount")
+            .in("gid", requestParam)
+            .eq("enable_status", 0)
+            .eq("del_flag", 0)
+            .eq("del_time", 0L)
+            .groupBy("gid");
+    List<Map<String, Object>> shortLinkDOList = baseMapper.selectMaps(queryWrapper);
+    return BeanUtil.copyToList(shortLinkDOList, ShortLinkGroupCountQueryRespDTO.class);
+  }
+
+  @Override
+  public IPage<ShortLinkPageRespDTO> pageShortLink(ShortLinkPageReqDTO requestParam) {
+    IPage<ShortLinkDO> resultPage = baseMapper.pageLink(requestParam);
+    return resultPage.convert(
+        each -> {
+          ShortLinkPageRespDTO result = BeanUtil.toBean(each, ShortLinkPageRespDTO.class);
+          result.setDomain("http://" + result.getDomain());
+          return result;
+        });
   }
 
   // 生成短链接后缀
