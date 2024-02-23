@@ -1,5 +1,5 @@
 server:
-  port: 8000
+  port: 8001
 
 spring:
   datasource:
@@ -10,6 +10,10 @@ spring:
       host: 127.0.0.1
       port: 6379
       password: 123456
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
 
 short-link:
   domain:
