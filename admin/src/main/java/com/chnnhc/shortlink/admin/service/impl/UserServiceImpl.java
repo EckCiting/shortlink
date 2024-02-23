@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static com.chnnhc.shortlink.admin.common.constant.RedisCacheConstant.LOCK_USER_REGISTER_KEY;
+import static com.chnnhc.shortlink.admin.common.constant.RedisCacheConstant.USER_LOGIN_KEY;
 import static com.chnnhc.shortlink.admin.common.enums.UserErrorCodeEnum.*;
 
 @Service
@@ -66,7 +67,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     }
     // 查询Redis中是否已经有该用户的登录记录
     Map<Object, Object> hasLoginMap =
-        stringRedisTemplate.opsForHash().entries("login_" + requestParam.getUsername());
+        stringRedisTemplate.opsForHash().entries(USER_LOGIN_KEY + requestParam.getUsername());
     if (CollUtil.isNotEmpty(hasLoginMap)) {
       // 如果登录记录存在，从Redis中获取已有的token
       String token =
@@ -80,11 +81,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     // 生成一个新的UUID作为token
     String uuid = UUID.randomUUID().toString();
     // 将新的登录信息（token及用户信息）存入Redis
-    stringRedisTemplate
-        .opsForHash()
-        .put("login_" + requestParam.getUsername(), uuid, JSON.toJSONString(userDO));
+    stringRedisTemplate.opsForHash().put(USER_LOGIN_KEY + requestParam.getUsername(), uuid, JSON.toJSONString(userDO));
+
     // 设置该登录记录的过期时间为30分钟
-    stringRedisTemplate.expire("login_" + requestParam.getUsername(), 30L, TimeUnit.MINUTES);
+    stringRedisTemplate.expire(USER_LOGIN_KEY + requestParam.getUsername(), 30L, TimeUnit.MINUTES);
     return new UserLoginRespDTO(uuid);
   }
 
