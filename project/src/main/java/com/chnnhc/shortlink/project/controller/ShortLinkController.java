@@ -6,6 +6,7 @@ import com.chnnhc.shortlink.project.common.result.Results;
 import com.chnnhc.shortlink.project.dto.req.ShortLinkBatchCreateReqDTO;
 import com.chnnhc.shortlink.project.dto.req.ShortLinkCreateReqDTO;
 import com.chnnhc.shortlink.project.dto.req.ShortLinkPageReqDTO;
+import com.chnnhc.shortlink.project.dto.req.ShortLinkUpdateReqDTO;
 import com.chnnhc.shortlink.project.dto.resp.ShortLinkBatchCreateRespDTO;
 import com.chnnhc.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
 import com.chnnhc.shortlink.project.dto.resp.ShortLinkGroupCountQueryRespDTO;
@@ -47,5 +48,14 @@ public class ShortLinkController {
   public Result<ShortLinkBatchCreateRespDTO> batchCreateShortLink(
       @RequestBody ShortLinkBatchCreateReqDTO requestParam) {
     return Results.success(shortLinkService.batchCreateShortLink(requestParam));
+  }
+
+  /**
+   * 修改短链接
+   */
+  @PostMapping("/api/short-link/v1/update")
+  public Result<Void> updateShortLink(@RequestBody ShortLinkUpdateReqDTO requestParam) {
+    shortLinkService.updateShortLink(requestParam);
+    return Results.success();
   }
 }

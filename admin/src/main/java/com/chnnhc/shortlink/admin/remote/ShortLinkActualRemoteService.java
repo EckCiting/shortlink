@@ -9,6 +9,7 @@ import com.chnnhc.shortlink.admin.dto.req.ShortLinkCreateReqDTO;
 import com.chnnhc.shortlink.admin.dto.resp.ShortLinkCreateRespDTO;
 import com.chnnhc.shortlink.admin.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import com.chnnhc.shortlink.admin.remote.dto.req.ShortLinkBatchCreateReqDTO;
+import com.chnnhc.shortlink.admin.remote.dto.req.ShortLinkUpdateReqDTO;
 import com.chnnhc.shortlink.admin.remote.dto.resp.ShortLinkBatchCreateRespDTO;
 import com.chnnhc.shortlink.admin.remote.dto.resp.ShortLinkPageRespDTO;
 import com.chnnhc.shortlink.admin.remote.dto.resp.ShortLinkStatsRespDTO;
@@ -131,4 +132,12 @@ public interface ShortLinkActualRemoteService {
       @RequestParam("gid") String gid,
       @RequestParam("startDate") String startDate,
       @RequestParam("endDate") String endDate);
+
+  /**
+   * 修改短链接
+   *
+   * @param requestParam 修改短链接请求参数
+   */
+  @PostMapping("/api/short-link/v1/update")
+  void updateShortLink(@RequestBody ShortLinkUpdateReqDTO requestParam);
 }

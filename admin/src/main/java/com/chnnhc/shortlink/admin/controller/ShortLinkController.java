@@ -11,6 +11,8 @@ import com.chnnhc.shortlink.admin.remote.dto.resp.ShortLinkBaseInfoRespDTO;
 import com.chnnhc.shortlink.admin.remote.dto.resp.ShortLinkBatchCreateRespDTO;
 import com.chnnhc.shortlink.admin.remote.dto.resp.ShortLinkPageRespDTO;
 import com.chnnhc.shortlink.admin.toolkit.EasyExcelWebUtil;
+import com.chnnhc.shortlink.admin.common.result.Results;
+import com.chnnhc.shortlink.admin.remote.dto.req.ShortLinkUpdateReqDTO;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -56,5 +58,14 @@ public class ShortLinkController {
         requestParam.getOrderTag(),
         requestParam.getCurrent(),
         requestParam.getSize());
+  }
+
+  /**
+   * 修改短链接
+   */
+  @PostMapping("/api/short-link/admin/v1/update")
+  public Result<Void> updateShortLink(@RequestBody ShortLinkUpdateReqDTO requestParam) {
+    shortLinkActualRemoteService.updateShortLink(requestParam);
+    return Results.success();
   }
 }
