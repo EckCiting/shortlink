@@ -11,6 +11,7 @@ import com.chnnhc.shortlink.admin.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import com.chnnhc.shortlink.admin.remote.dto.req.ShortLinkBatchCreateReqDTO;
 import com.chnnhc.shortlink.admin.remote.dto.resp.ShortLinkBatchCreateRespDTO;
 import com.chnnhc.shortlink.admin.remote.dto.resp.ShortLinkPageRespDTO;
+import com.chnnhc.shortlink.admin.remote.dto.resp.ShortLinkStatsRespDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -114,4 +115,20 @@ public interface ShortLinkActualRemoteService {
    */
   @GetMapping("/api/short-link/v1/title")
   Result<String> getTitleByUrl(@RequestParam("url") String url);
+
+  /**
+   * 访问单个短链接指定时间内监控数据
+   *
+   * @param fullShortUrl 完整短链接
+   * @param gid 分组标识
+   * @param startDate 开始时间
+   * @param endDate 结束时间
+   * @return 短链接监控信息
+   */
+  @GetMapping("/api/short-link/v1/stats")
+  Result<ShortLinkStatsRespDTO> oneShortLinkStats(
+      @RequestParam("fullShortUrl") String fullShortUrl,
+      @RequestParam("gid") String gid,
+      @RequestParam("startDate") String startDate,
+      @RequestParam("endDate") String endDate);
 }
