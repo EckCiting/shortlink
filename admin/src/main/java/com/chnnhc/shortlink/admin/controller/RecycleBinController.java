@@ -17,6 +17,7 @@
 
 package com.chnnhc.shortlink.admin.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.chnnhc.shortlink.admin.common.result.Result;
 import com.chnnhc.shortlink.admin.common.result.Results;
 import com.chnnhc.shortlink.admin.dto.req.RecycleBinRecoverReqDTO;
@@ -24,7 +25,10 @@ import com.chnnhc.shortlink.admin.dto.req.RecycleBinRemoveReqDTO;
 import com.chnnhc.shortlink.admin.dto.req.RecycleBinSaveReqDTO;
 import com.chnnhc.shortlink.admin.remote.ShortLinkActualRemoteService;
 import com.chnnhc.shortlink.admin.service.RecycleBinService;
+import com.chnnhc.shortlink.admin.remote.dto.req.ShortLinkRecycleBinPageReqDTO;
+import com.chnnhc.shortlink.admin.remote.dto.resp.ShortLinkPageRespDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,6 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class RecycleBinController {
 
+  private final RecycleBinService recycleBinService;
   private final ShortLinkActualRemoteService shortLinkActualRemoteService;
 
   /** 保存回收站 */
@@ -41,6 +46,14 @@ public class RecycleBinController {
   public Result<Void> saveRecycleBin(@RequestBody RecycleBinSaveReqDTO requestParam) {
     shortLinkActualRemoteService.saveRecycleBin(requestParam);
     return Results.success();
+  }
+
+  /**
+   * 分页查询回收站短链接
+   */
+  @GetMapping("/api/short-link/admin/v1/recycle-bin/page")
+  public Result<Page<ShortLinkPageRespDTO>> pageShortLink(ShortLinkRecycleBinPageReqDTO requestParam) {
+    return recycleBinService.pageRecycleBinShortLink(requestParam);
   }
 
   /** 恢复短链接 */

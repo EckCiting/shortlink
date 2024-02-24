@@ -146,7 +146,10 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
 
   @Override
   public IPage<ShortLinkPageRespDTO> pageShortLink(ShortLinkPageReqDTO requestParam) {
+    // 使用请求参数中的分页信息进行数据库查询
     IPage<ShortLinkDO> resultPage = baseMapper.pageLink(requestParam);
+    // 使用IPage接口的convert方法将查询结果中的每一个ShortLinkDO对象转换为ShortLinkPageRespDTO对象
+    // 在转换过程中，将domain字段修改为包含"http://"前缀的完整URL
     return resultPage.convert(
         each -> {
           ShortLinkPageRespDTO result = BeanUtil.toBean(each, ShortLinkPageRespDTO.class);
