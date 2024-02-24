@@ -103,6 +103,15 @@ public interface ShortLinkActualRemoteService {
    * @return 短链接批量创建响应
    */
   @PostMapping("/api/short-link/v1/create/batch")
-  Result<ShortLinkBatchCreateRespDTO> batchCreateShortLink(@RequestBody ShortLinkBatchCreateReqDTO requestParam);
+  Result<ShortLinkBatchCreateRespDTO> batchCreateShortLink(
+      @RequestBody ShortLinkBatchCreateReqDTO requestParam);
 
+  /**
+   * 根据 URL 获取标题
+   *
+   * @param url 目标网站地址
+   * @return 网站标题
+   */
+  @GetMapping("/api/short-link/v1/title")
+  Result<String> getTitleByUrl(@RequestParam("url") String url);
 }
