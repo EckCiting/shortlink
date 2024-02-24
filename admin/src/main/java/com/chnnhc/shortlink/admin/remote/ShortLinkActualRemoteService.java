@@ -8,6 +8,8 @@ import com.chnnhc.shortlink.admin.dto.req.RecycleBinSaveReqDTO;
 import com.chnnhc.shortlink.admin.dto.req.ShortLinkCreateReqDTO;
 import com.chnnhc.shortlink.admin.dto.resp.ShortLinkCreateRespDTO;
 import com.chnnhc.shortlink.admin.dto.resp.ShortLinkGroupCountQueryRespDTO;
+import com.chnnhc.shortlink.admin.remote.dto.req.ShortLinkBatchCreateReqDTO;
+import com.chnnhc.shortlink.admin.remote.dto.resp.ShortLinkBatchCreateRespDTO;
 import com.chnnhc.shortlink.admin.remote.dto.resp.ShortLinkPageRespDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -93,4 +95,14 @@ public interface ShortLinkActualRemoteService {
    */
   @PostMapping("/api/short-link/v1/recycle-bin/remove")
   void removeRecycleBin(@RequestBody RecycleBinRemoveReqDTO requestParam);
+
+  /**
+   * 批量创建短链接
+   *
+   * @param requestParam 批量创建短链接请求参数
+   * @return 短链接批量创建响应
+   */
+  @PostMapping("/api/short-link/v1/create/batch")
+  Result<ShortLinkBatchCreateRespDTO> batchCreateShortLink(@RequestBody ShortLinkBatchCreateReqDTO requestParam);
+
 }
